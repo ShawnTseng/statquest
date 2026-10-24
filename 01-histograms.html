@@ -359,7 +359,8 @@ const DATASETS = {
 const SIZES = [20, 50, 100, 300, 1000];
 const MAX_N = 1000;
 
-const state = { ds: "height", y: "count", bw: 3, nn: 2, seed: 7, sel: null };
+// seed 23：預設畫面跟頁面上的例子一致（165 到 170 公分 23 人、回覆時間平均約 21 秒）
+const state = { ds: "height", y: "count", bw: 3, nn: 2, seed: 23, sel: null };
 let pool = [];
 
 function mulberry32(a) {
