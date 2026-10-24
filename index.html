@@ -230,6 +230,7 @@ const WEEKS = [
 
 // 已經做好的中文筆記頁
 const PAGES = {
+  1: "01-histograms.html",
 };
 
 const CORE_TOTAL = 16;
@@ -322,6 +323,10 @@ function renderWeeks() {
 
 renderWeeks();
 renderSummary();
+// 從課程頁用「上一頁」回來時，頁面是從快取還原的，要重讀進度
+window.addEventListener("pageshow", e => {
+  if (e.persisted) { watched = readWatched(); renderWeeks(); renderSummary(); }
+});
 document.getElementById("weeks").addEventListener("change", e => {
   const box = e.target.closest("input[data-n]");
   if (!box) return;
