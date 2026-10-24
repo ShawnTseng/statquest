@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>#02 機率分布｜跟著 StatQuest 學統計</title>
+<meta name="description" content="StatQuest「The Main Ideas behind Probability Distributions」的中文筆記：從直方圖到機率分布的白話解釋、兩個互動圖、7 題小測驗。">
+<style>
+/* Layout: one reading column; the two interactive panels and the quiz are the set-off blocks */
+:root {
+  --bg: #f5f7fb;
+  --surface: #ffffff;
+  --ink: #18212f;
+  --muted: #5a6779;
+  --line: #dfe5ee;
+  --grid: rgba(37, 87, 199, 0.07);
+  --accent: #2557c7;
+  --accent-ink: #ffffff;
+  --accent-soft: #e8eefc;
+  --hi: #e0a91b;
+  --hi-soft: #fdf3d3;
+  --done: #1d8456;
+  --done-soft: #e3f3eb;
+  --bad: #c2412d;
+  --bad-soft: #fbe9e5;
+  --font-display: "Avenir Next", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141c; --surface: #171e29; --ink: #e7ecf3; --muted: #9aa7b8; --line: #2a3443;
+    --grid: rgba(134, 168, 255, 0.06); --accent: #86a8ff; --accent-ink: #0f141c; --accent-soft: rgba(134, 168, 255, 0.14);
+    --hi: #f4c542; --hi-soft: rgba(244, 197, 66, 0.14); --done: #4cc38a; --done-soft: rgba(76, 195, 138, 0.14);
+    --bad: #ff8a73; --bad-soft: rgba(255, 138, 115, 0.14);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141c; --surface: #171e29; --ink: #e7ecf3; --muted: #9aa7b8; --line: #2a3443;
+  --grid: rgba(134, 168, 255, 0.06); --accent: #86a8ff; --accent-ink: #0f141c; --accent-soft: rgba(134, 168, 255, 0.14);
+  --hi: #f4c542; --hi-soft: rgba(244, 197, 66, 0.14); --done: #4cc38a; --done-soft: rgba(76, 195, 138, 0.14);
+  --bad: #ff8a73; --bad-soft: rgba(255, 138, 115, 0.14);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.75 var(--font-body); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+.inner {
+  max-width: 720px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+.top { background-color: var(--surface); background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 22px 22px; border-bottom: 1px solid var(--line); }
+.top .inner { padding-block: 18px 28px; display: grid; gap: 12px; }
+.crumb { font-size: 14px; }
+.crumb a { text-decoration: none; }
+.eyebrow { font: 700 13px/1 var(--font-mono); color: var(--accent); letter-spacing: 0.04em; }
+h1 { margin: 0; font: 700 34px/1.2 var(--font-display); text-wrap: balance; }
+.en { margin: 0; color: var(--muted); font-size: 15px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 42px; padding: 0 16px; border-radius: 10px;
+  font: 600 15px/1 var(--font-body); text-decoration: none; white-space: nowrap; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.meta { font-size: 14px; color: var(--muted); }
+
+main .inner { padding-block: 28px 56px; display: grid; gap: 40px; }
+section { display: grid; gap: 14px; }
+h2 { margin: 0; font: 700 22px/1.3 var(--font-display); text-wrap: balance; }
+h3 { margin: 0; font: 700 17px/1.4 var(--font-display); }
+p { margin: 0; }
+.prose { display: grid; gap: 12px; max-width: 40em; }
+.prose ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+.term { font-weight: 700; }
+.key {
+  background: var(--accent-soft); border-radius: 12px; padding: 16px 18px;
+  font: 700 18px/1.6 var(--font-display);
+}
+.key small { display: block; font: 600 13px/1.4 var(--font-body); color: var(--accent); margin-bottom: 4px; letter-spacing: 0.04em; }
+
+.compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.compare > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 6px; align-content: start; }
+.compare h3 { font-size: 16px; }
+.compare p { font-size: 15px; color: var(--muted); }
+
+.myth { border-left: 4px solid var(--hi); background: var(--hi-soft); border-radius: 0 12px 12px 0; padding: 14px 16px; display: grid; gap: 6px; }
+.myth b { font-weight: 700; }
+
+/* interactive panels */
+.lab { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 14px; }
+.lab h3 { font-size: 16px; }
+.controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+.control { display: grid; gap: 6px; min-width: 0; }
+.control label { font-size: 14px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.control output { color: var(--ink); font: 600 14px/1.5 var(--font-mono); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; height: 28px; }
+svg.chart { display: block; width: 100%; height: auto; touch-action: manipulation; }
+.chart .bar { fill: var(--accent); fill-opacity: 0.35; }
+.chart .dbar { fill: var(--accent); cursor: pointer; }
+.chart .dbar.sel { fill: var(--hi); }
+.chart .curve { fill: none; stroke: var(--ink); stroke-width: 2.5; }
+.chart .area { fill: var(--hi); fill-opacity: 0.55; }
+.chart .edge { stroke: var(--hi); stroke-width: 2; }
+.chart .gridline { stroke: var(--line); stroke-width: 1; }
+.chart .axis { stroke: var(--muted); stroke-width: 1; }
+.chart text { fill: var(--muted); font: 12px var(--font-mono); }
+.chart .axislabel { fill: var(--muted); font: 12px var(--font-body); }
+.readout { background: var(--bg); border-radius: 10px; padding: 12px 14px; font-size: 15px; display: grid; gap: 6px; }
+.readout .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 700; }
+.est { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; }
+.est .lbl small { display: block; font-size: 13px; color: var(--muted); }
+.est .num { font-size: 17px; text-align: right; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.legend .l-bar { background: var(--accent); opacity: 0.35; }
+.legend .l-curve { height: 3px; background: var(--ink); }
+.legend .l-area { background: var(--hi); opacity: 0.7; }
+.tries { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; font-size: 15px; color: var(--muted); }
+.note { font-size: 13px; color: var(--muted); }
+
+/* examples */
+.cases { display: grid; gap: 12px; }
+.case { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 8px; }
+.case .tag { font: 700 12px/1 var(--font-mono); color: var(--accent); letter-spacing: 0.04em; }
+.case table { border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+.case td { padding: 4px 16px 4px 0; border-bottom: 1px solid var(--line); }
+.case td + td { font-family: var(--font-mono); text-align: right; }
+
+/* quiz */
+.quiz { display: grid; gap: 14px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+.q-head { display: flex; gap: 10px; align-items: baseline; }
+.q-no { font: 700 13px/1 var(--font-mono); color: var(--accent); flex: none; }
+.q-text { font-weight: 600; }
+.opts { display: grid; gap: 8px; }
+.opt {
+  text-align: left; min-height: 44px; padding: 10px 14px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  font: 15px/1.5 var(--font-body); cursor: pointer; display: flex; gap: 10px; align-items: flex-start;
+}
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt:disabled { cursor: default; }
+.opt .letter { font: 700 13px/1.5 var(--font-mono); color: var(--muted); flex: none; }
+.opt.right { border-color: var(--done); background: var(--done-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.opt .mark { font-weight: 600; white-space: nowrap; }
+.opt.right .mark { color: var(--done); }
+.opt.wrong .mark { color: var(--bad); }
+.calc { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.calc input { min-height: 44px; width: 140px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 600 16px/1 var(--font-mono); }
+.fb { border-radius: 10px; padding: 12px 14px; font-size: 15px; display: grid; gap: 4px; background: var(--bg); }
+.fb.right { background: var(--done-soft); }
+.fb.wrong { background: var(--bad-soft); }
+.fb b { font-weight: 700; }
+.fb.right b { color: var(--done); }
+.fb.wrong b { color: var(--bad); }
+textarea { width: 100%; min-height: 110px; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 15px/1.6 var(--font-body); resize: vertical; }
+.ref { background: var(--bg); border-radius: 10px; padding: 14px; display: grid; gap: 8px; font-size: 15px; }
+.ref ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.ref label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.ref input { width: 18px; height: 18px; margin-top: 4px; accent-color: var(--done); flex: none; }
+.score { background: var(--surface); border: 2px solid var(--accent); border-radius: 14px; padding: 16px; display: grid; gap: 10px; }
+.score .big { font: 700 28px/1.2 var(--font-display); }
+.score .big span { font-family: var(--font-mono); }
+
+footer { border-top: 1px solid var(--line); }
+footer .inner { padding-block: 20px 40px; display: grid; gap: 6px; font-size: 14px; color: var(--muted); }
+
+@media (max-width: 560px) {
+  h1 { font-size: 30px; }
+  .compare, .controls { grid-template-columns: 1fr; }
+  .lab { padding: 14px 12px; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="inner">
+    <div class="crumb"><a href="./">← 回目錄</a></div>
+    <div class="eyebrow">#02 · 第 1 週：看懂資料的形狀</div>
+    <h1>機率分布的核心概念</h1>
+    <p class="en">StatQuest：The Main Ideas behind Probability Distributions</p>
+    <div class="row">
+      <a class="btn primary" href="https://www.youtube.com/watch?v=oI3hZJqXJuc" target="_blank" rel="noopener">▶ 看影片（5:15）</a>
+      <span class="meta">讀這頁加測驗約 12 分鐘</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="inner">
+
+    <section aria-labelledby="s-idea">
+      <h2 id="s-idea">白話解釋</h2>
+      <div class="prose">
+        <p>#01 的筆記提到：直方圖每一格的比例，可以拿來估計「下一筆落在這格」的機率。但直方圖有兩個麻煩：</p>
+        <ol>
+          <li><span class="term">資料少就坑坑洞洞。</span>某一格剛好沒抽到，看起來是 0%，不代表真的不可能。</li>
+          <li><span class="term">想問細一點的範圍就更不準。</span>例如想知道 167 到 168 公分，區間要切更窄，每格分到的資料更少。</li>
+        </ol>
+        <p>解法是用一條平滑的曲線，描述整體大概長什麼樣子。這條曲線就是<span class="term">機率分布</span>（probability distribution）：它告訴你每個範圍出現的機率有多大。</p>
+      </div>
+
+      <div class="compare">
+        <div>
+          <h3>連續型：看面積</h3>
+          <p>可以是任何小數的東西，例如身高、回覆秒數、訂單金額。範圍底下的<strong>面積</strong>就是機率，整條曲線底下的面積是 1（100%）。</p>
+        </div>
+        <div>
+          <h3>離散型：看長條</h3>
+          <p>只能是一個一個的值，例如答對幾題、一天幾筆訂單、骰子點數。每個值一根長條，<strong>長條高度</strong>就是機率，全部加起來是 100%。</p>
+        </div>
+      </div>
+
+      <div class="myth">
+        <b>最常搞混：連續型曲線的「高度」不是機率，「面積」才是</b>
+        <p>所以連續型只問「落在某個範圍」的機率。剛好等於某一個值（例如剛好 170.000… 公分）的機率是 0，因為一個點沒有寬度，底下沒有面積。</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="s-lab1">
+      <h2 id="s-lab1">從直方圖到曲線</h2>
+      <div class="lab">
+        <div class="controls">
+          <div class="control">
+            <label for="ra">範圍從 <output id="ra-out" for="ra"></output></label>
+            <input type="range" id="ra" min="140" max="199" step="1" value="165">
+          </div>
+          <div class="control">
+            <label for="rb">到 <output id="rb-out" for="rb"></output></label>
+            <input type="range" id="rb" min="141" max="200" step="1" value="170">
+          </div>
+          <div class="control">
+            <label for="nn">樣本數 <output id="nn-out" for="nn"></output></label>
+            <input type="range" id="nn" min="0" max="4" step="1" value="2">
+          </div>
+          <div class="control" style="align-content:end">
+            <button type="button" class="btn" id="resample">↻ 重新抽一次</button>
+          </div>
+        </div>
+
+        <svg id="chart1" class="chart" viewBox="0 0 640 300" role="img" aria-labelledby="chart1-title">
+          <title id="chart1-title">身高的直方圖和機率分布曲線</title>
+        </svg>
+        <div class="legend">
+          <span><i class="l-bar"></i>直方圖（這批資料）</span>
+          <span><i class="l-curve"></i>機率分布曲線</span>
+          <span><i class="l-area"></i>選的範圍</span>
+        </div>
+
+        <div class="readout" id="readout1" aria-live="polite"></div>
+
+        <ol class="tries">
+          <li>樣本數拉到 20，按幾次「重新抽一次」。直方圖的比例通常跳得很大，曲線的估計跳得小很多。</li>
+          <li>把範圍設成 190 到 200。資料少的時候，直方圖常常說 0%，曲線還是算得出一個小小的機率。</li>
+          <li>範圍拉成 140 到 200，幾乎包含全部。三個數字都接近 100%，因為總面積是 1。</li>
+        </ol>
+        <p class="note">為了跟直方圖疊在一起比較，圖上的曲線高度乘上了「筆數 × 5」，換成每 5 公分幾人，形狀不變。換回機率的刻度，曲線底下的總面積就是 1，讀數裡的「曲線估計」就是用這個刻度算的。</p>
+        <p class="note">資料是電腦從「平均 170、標準差 8 公分」的常態分布隨機抽的示範資料。曲線是用這批資料的平均和標準差畫出來的常態曲線，#03 會細講。「真正的機率」只有模擬時才知道，現實中你看不到它。</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="s-lab2">
+      <h2 id="s-lab2">離散型：一次評測答對幾題</h2>
+      <div class="lab">
+        <div class="controls">
+          <div class="control">
+            <label for="pp">每題答對機率 <output id="pp-out" for="pp"></output></label>
+            <input type="range" id="pp" min="50" max="99" step="1" value="90">
+          </div>
+          <div class="control" style="align-content:end">
+            <span class="note">假設 10 題，每題答對機率一樣、彼此不影響。</span>
+          </div>
+        </div>
+        <svg id="chart2" class="chart" viewBox="0 0 640 260" role="img" aria-labelledby="chart2-title">
+          <title id="chart2-title">10 題答對題數的機率分布</title>
+        </svg>
+        <div class="readout" id="readout2" aria-live="polite"></div>
+        <div class="row">
+          <button type="button" class="btn" id="prev-k" aria-label="選少一題">◀</button>
+          <button type="button" class="btn" id="next-k" aria-label="選多一題">▶</button>
+          <span class="note">點長條或按 ◀ ▶ 換題數。</span>
+        </div>
+        <p class="note">這種「做 n 次、每次成功或失敗」的分布叫二項分布，#08 會細講。</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="s-use">
+      <h2 id="s-use">用在哪裡</h2>
+      <div class="cases">
+        <div class="case">
+          <div class="tag">例子 1 · AI 客服評測 105 題</div>
+          <p>假設一個 AI 客服真正的準確率是 99%，每題答對機率都是 99%、題目彼此不影響。跑一次 105 題的評測，可能的結果是：</p>
+          <table>
+            <tbody>
+              <tr><td>105 題全對</td><td>約 34.8%</td></tr>
+              <tr><td>答對 104 題</td><td>約 36.9%</td></tr>
+              <tr><td>答對 103 題</td><td>約 19.4%</td></tr>
+              <tr><td>102 題以下</td><td>約 8.9%</td></tr>
+            </tbody>
+          </table>
+          <p>同一個 AI，這次 105/105、下次 104/105 都很常見。<strong>只差 1 題，不代表變差。</strong>要判斷是不是真的變差，後面的假設檢定（#09 到 #11）會教。</p>
+        </div>
+        <div class="case">
+          <div class="tag">例子 2 · 回覆超過 60 秒的機率</div>
+          <p>假設這次抽到的 100 則 AI 客服回覆，剛好沒有一則超過 60 秒。直方圖會說機率 0%，但這不代表永遠不會發生。用一條合適的曲線，可以估出超過 60 秒的機率大約多小。</p>
+          <p>前提是<strong>曲線的形狀要選對</strong>。回覆時間右邊拖著長尾，硬套鐘形曲線會嚴重低估。#01 的示範回覆時間是電腦照固定規則產生的（一半在 18 秒以內，右邊拖著長尾）。照那個規則算，真正的機率約 1.4%；換成平均和標準差都跟它一樣的鐘形曲線，只算出約 0.1%。</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="s-quiz">
+      <h2 id="s-quiz">小測驗</h2>
+      <p class="meta">前 6 題作答後馬上看對錯，第 7 題用自己的話解釋，再對照參考答案。</p>
+      <div class="quiz" id="quiz"></div>
+      <div class="score" id="score" hidden></div>
+    </section>
+
+    <section aria-labelledby="s-key">
+      <h2 id="s-key">一句話記住</h2>
+      <div class="key"><small>機率分布</small>告訴你每個範圍出現的機率：連續的看曲線底下的面積，離散的看每根長條，全部加起來是 100%。</div>
+      <div class="row">
+        <a class="btn primary" href="https://www.youtube.com/watch?v=rzFX5NWojp0" target="_blank" rel="noopener">下一支：#03 常態分布 ▶</a>
+        <a class="btn" href="./">回目錄</a>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="inner">
+    <p>影片來自 <a href="https://www.youtube.com/@statquest" target="_blank" rel="noopener">StatQuest with Josh Starmer</a>，版權屬原作者。這頁是看完後整理的非官方中文筆記，補充的定義以標準統計教科書為準。</p>
+    <p>發現錯誤歡迎到 <a href="https://github.com/ShawnTseng/statquest/issues" target="_blank" rel="noopener">GitHub</a> 開 issue。</p>
+  </div>
+</footer>
+
+<script>
+/* ---------- shared helpers ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function gauss(rng) {
+  let u = 0, v = 0;
+  while (u === 0) u = rng();
+  while (v === 0) v = rng();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+// 標準常態的累積機率（Abramowitz and Stegun 7.1.26，誤差小於 1.5e-7）
+function phi(z) {
+  const x = Math.abs(z) / Math.SQRT2, t = 1 / (1 + 0.3275911 * x);
+  const erf = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+  return z >= 0 ? (1 + erf) / 2 : (1 - erf) / 2;
+}
+function pdf(x, m, s) { return Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * Math.sqrt(2 * Math.PI)); }
+function niceStep(max, maxTicks) {
+  const raw = max / maxTicks;
+  const p = Math.pow(10, Math.floor(Math.log10(raw)));
+  for (const m of [1, 2, 5, 10]) if (m * p >= raw) return m * p;
+  return 10 * p;
+}
+function pctText(p) {
+  if (p > 0 && p < 0.001) return "不到 0.1%";
+  return (p * 100).toFixed(1) + "%";
+}
+function chartWidth(svg) {
+  return Math.round(Math.max(300, Math.min(640, svg.getBoundingClientRect().width || 640)));
+}
+
+/* ---------- panel 1: histogram to curve ---------- */
+const TRUE_M = 170, TRUE_S = 8, LO = 140, HI = 200, BIN = 5;
+const SIZES = [20, 50, 100, 300, 1000];
+const st1 = { a: 165, b: 170, nn: 2, seed: 23 };
+let pool = [];
+
+function regen() {
+  const rng = mulberry32(st1.seed * 9973);
+  pool = Array.from({ length: 1000 }, () => TRUE_M + TRUE_S * gauss(rng));
+}
+
+function render1() {
+  const n = SIZES[st1.nn], data = pool.slice(0, n);
+  const m = data.reduce((s, x) => s + x, 0) / n;
+  const sd = Math.sqrt(data.reduce((s, x) => s + (x - m) ** 2, 0) / (n - 1));
+  const nb = (HI - LO) / BIN;
+  const counts = new Array(nb).fill(0);
+  data.forEach(x => { const i = Math.floor((x - LO) / BIN); if (i >= 0 && i < nb) counts[i]++; });
+
+  document.getElementById("ra-out").textContent = st1.a + " 公分";
+  document.getElementById("rb-out").textContent = st1.b + " 公分";
+  document.getElementById("nn-out").textContent = n + " 筆";
+  document.getElementById("nn").setAttribute("aria-valuetext", n + " 筆");
+  document.getElementById("ra").setAttribute("aria-valuetext", st1.a + " 公分");
+  document.getElementById("rb").setAttribute("aria-valuetext", st1.b + " 公分");
+
+  const svg = document.getElementById("chart1");
+  const W = chartWidth(svg), H = W < 480 ? 260 : 300, L = 40, R = 12, T = 14, B = 42;
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  const pw = W - L - R, ph = H - T - B;
+  const curveAt = x => n * BIN * pdf(x, m, sd);       // 曲線換算成「每 5 公分幾筆」，才能跟直方圖疊在一起
+  const peak = Math.max(Math.max(...counts), curveAt(m));
+  const step = Math.max(1, niceStep(peak, 4));
+  const yMax = Math.ceil(peak * 1.05 / step) * step;
+  const xs = v => L + (v - LO) / (HI - LO) * pw;
+  const ys = v => T + ph - v / yMax * ph;
+
+  let s = '<title id="chart1-title">身高的直方圖和機率分布曲線，' + n + " 筆</title>";
+  for (let v = 0; v <= yMax + 1e-9; v += step) {
+    const y = ys(v);
+    s += '<line class="gridline" x1="' + L + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '"/>';
+    s += '<text x="' + (L - 6) + '" y="' + (y + 4) + '" text-anchor="end">' + v + "</text>";
+  }
+  counts.forEach((c, i) => {
+    if (!c) return;
+    const x0 = xs(LO + i * BIN), x1 = xs(LO + (i + 1) * BIN), y = ys(c);
+    s += '<rect class="bar" x="' + (x0 + 0.5) + '" y="' + y + '" width="' + (x1 - x0 - 1) + '" height="' + (T + ph - y) + '"/>';
+  });
+  // 選的範圍：曲線底下的面積
+  let area = "M" + xs(st1.a) + "," + ys(0);
+  for (let x = st1.a; x <= st1.b + 1e-9; x += 0.25) area += " L" + xs(x).toFixed(1) + "," + ys(curveAt(x)).toFixed(1);
+  area += " L" + xs(st1.b) + "," + ys(0) + " Z";
+  s += '<path class="area" d="' + area + '"/>';
+  s += '<line class="edge" x1="' + xs(st1.a) + '" x2="' + xs(st1.a) + '" y1="' + T + '" y2="' + (T + ph) + '"/>';
+  s += '<line class="edge" x1="' + xs(st1.b) + '" x2="' + xs(st1.b) + '" y1="' + T + '" y2="' + (T + ph) + '"/>';
+  let path = "";
+  for (let x = LO; x <= HI + 1e-9; x += 0.5) path += (path ? " L" : "M") + xs(x).toFixed(1) + "," + ys(curveAt(x)).toFixed(1);
+  s += '<path class="curve" d="' + path + '"/>';
+  s += '<line class="axis" x1="' + L + '" x2="' + (W - R) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '"/>';
+  const tick = W < 480 ? 20 : 10;
+  for (let v = LO; v <= HI; v += tick) {
+    s += '<text x="' + xs(v) + '" y="' + (T + ph + 17) + '" text-anchor="middle">' + v + "</text>";
+  }
+  s += '<text class="axislabel" x="' + (L + pw / 2) + '" y="' + (H - 6) + '" text-anchor="middle">身高（公分），y 軸是每 5 公分的人數</text>';
+  svg.innerHTML = s;
+
+  const inRange = data.filter(x => x >= st1.a && x < st1.b).length;
+  const pHist = inRange / n;
+  const pCurve = phi((st1.b - m) / sd) - phi((st1.a - m) / sd);
+  const pTrue = phi((st1.b - TRUE_M) / TRUE_S) - phi((st1.a - TRUE_M) / TRUE_S);
+  document.getElementById("readout1").innerHTML =
+    "<div>身高落在 <span class=\"num\">" + st1.a + " 到 " + st1.b + "</span> 公分的機率：</div>" +
+    '<div class="est">' +
+      '<div class="lbl">直方圖估計<small>這 ' + n + " 筆裡有 " + inRange + " 筆落在範圍內</small></div><div class=\"num\">" + pctText(pHist) + "</div>" +
+      '<div class="lbl">曲線估計<small>範圍內面積占曲線總面積的比例</small></div><div class="num">' + pctText(pCurve) + "</div>" +
+      '<div class="lbl">真正的機率<small>只有模擬才知道</small></div><div class="num">' + pctText(pTrue) + "</div>" +
+    "</div>";
+}
+
+document.getElementById("ra").addEventListener("input", e => {
+  st1.a = Number(e.target.value);
+  if (st1.a >= st1.b) { st1.b = st1.a + 1; document.getElementById("rb").value = st1.b; }
+  render1();
+});
+document.getElementById("rb").addEventListener("input", e => {
+  st1.b = Number(e.target.value);
+  if (st1.b <= st1.a) { st1.a = st1.b - 1; document.getElementById("ra").value = st1.a; }
+  render1();
+});
+document.getElementById("nn").addEventListener("input", e => { st1.nn = Number(e.target.value); render1(); });
+document.getElementById("resample").addEventListener("click", () => { st1.seed++; regen(); render1(); });
+
+/* ---------- panel 2: discrete, questions answered correctly ---------- */
+const NQ = 10;
+const st2 = { p: 0.9, sel: NQ };
+function comb(n, k) { let r = 1; for (let i = 1; i <= k; i++) r = r * (n - k + i) / i; return r; }
+function binom(n, k, p) { return comb(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k); }
+
+function render2() {
+  const probs = Array.from({ length: NQ + 1 }, (_, k) => binom(NQ, k, st2.p));
+  document.getElementById("pp-out").textContent = Math.round(st2.p * 100) + "%";
+  document.getElementById("pp").setAttribute("aria-valuetext", "每題答對機率 " + Math.round(st2.p * 100) + "%");
+  const svg = document.getElementById("chart2");
+  const W = chartWidth(svg), H = 260, L = 44, R = 12, T = 14, B = 42;
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  const pw = W - L - R, ph = H - T - B;
+  const top = Math.max(...probs) * 100;
+  const step = niceStep(top, 4);
+  const yMax = Math.ceil(top * 1.05 / step) * step;
+  const slot = pw / (NQ + 1), bw = slot * 0.7;
+  const ys = v => T + ph - v / yMax * ph;
+  let s = '<title id="chart2-title">10 題答對題數的機率分布，每題答對機率 ' + Math.round(st2.p * 100) + "%</title>";
+  for (let v = 0; v <= yMax + 1e-9; v += step) {
+    const y = ys(v);
+    s += '<line class="gridline" x1="' + L + '" x2="' + (W - R) + '" y1="' + y + '" y2="' + y + '"/>';
+    s += '<text x="' + (L - 6) + '" y="' + (y + 4) + '" text-anchor="end">' + (Number.isInteger(v) ? v : v.toFixed(1)) + "%</text>";
+  }
+  probs.forEach((p, k) => {
+    const x = L + k * slot + (slot - bw) / 2, y = ys(p * 100);
+    s += '<rect class="dbar' + (k === st2.sel ? " sel" : "") + '" data-k="' + k + '" x="' + x + '" y="' + y + '" width="' + bw + '" height="' + Math.max(0, T + ph - y) + '"/>';
+    s += '<text x="' + (x + bw / 2) + '" y="' + (T + ph + 17) + '" text-anchor="middle">' + k + "</text>";
+  });
+  s += '<line class="axis" x1="' + L + '" x2="' + (W - R) + '" y1="' + (T + ph) + '" y2="' + (T + ph) + '"/>';
+  s += '<text class="axislabel" x="' + (L + pw / 2) + '" y="' + (H - 6) + '" text-anchor="middle">答對題數</text>';
+  svg.innerHTML = s;
+
+  const total = probs.reduce((a, b) => a + b, 0);
+  const lowerOrEq8 = probs.slice(0, NQ - 1).reduce((a, b) => a + b, 0);
+  document.getElementById("readout2").innerHTML =
+    "<div>答對 <span class=\"num\">" + st2.sel + "</span> 題的機率：<span class=\"num\">" + pctText(probs[st2.sel]) + "</span></div>" +
+    "<div>全對 " + pctText(probs[NQ]) + "，錯 1 題 " + pctText(probs[NQ - 1]) + "，錯 2 題以上 " + pctText(lowerOrEq8) + "。</div>" +
+    "<div>11 根長條加起來：<span class=\"num\">" + (total * 100).toFixed(1) + "%</span></div>";
+}
+document.getElementById("pp").addEventListener("input", e => { st2.p = Number(e.target.value) / 100; render2(); });
+document.getElementById("chart2").addEventListener("click", e => {
+  const bar = e.target.closest(".dbar");
+  if (!bar) return;
+  st2.sel = Number(bar.dataset.k); render2();
+});
+document.getElementById("prev-k").addEventListener("click", () => { st2.sel = Math.max(0, st2.sel - 1); render2(); });
+document.getElementById("next-k").addEventListener("click", () => { st2.sel = Math.min(NQ, st2.sel + 1); render2(); });
+
+let lastW = 0;
+window.addEventListener("resize", () => {
+  const cw = document.getElementById("chart1").getBoundingClientRect().width;
+  if (Math.abs(cw - lastW) > 1) { lastW = cw; render1(); render2(); }
+});
+// 重新整理後，有些瀏覽器會保留滑桿位置，先從滑桿讀回狀態
+st1.a = Number(document.getElementById("ra").value);
+st1.b = Number(document.getElementById("rb").value);
+if (st1.b <= st1.a) { st1.b = st1.a + 1; document.getElementById("rb").value = st1.b; }
+st1.nn = Number(document.getElementById("nn").value);
+st2.p = Number(document.getElementById("pp").value) / 100;
+regen();
+render1();
+render2();
+
+/* ---------- quiz ---------- */
+const LESSON = "02";
+const QUESTIONS = [
+  { type: "mc", q: "「身高落在 165 到 170 公分」的機率，在連續型的機率分布上要看什麼？",
+    opts: ["曲線在 167.5 公分那一點的高度", "曲線底下、165 到 170 之間那塊面積", "直方圖最高那根長條的高度", "165 和 170 兩點曲線高度的平均"], a: 1,
+    why: "連續型用面積算機率：範圍底下的面積，就是落在那個範圍的機率。曲線某一點的高度本身不是機率。" },
+  { type: "mc", q: "一條連續型機率分布的曲線，底下的總面積是多少？",
+    opts: ["0.5，平均的左右各一半", "看收集了幾筆資料而定", "看平均數是多少而定", "1，也就是 100%"], a: 3,
+    why: "所有可能的值加起來一定是 100%，所以總面積固定是 1。離散型也一樣，所有長條加起來是 100%。" },
+  { type: "mc", q: "為什麼常用一條平滑曲線，代替直方圖來算機率？",
+    opts: ["曲線算出來的機率一定比直方圖正確", "直方圖的比例不能拿來估計機率", "資料少時直方圖會有空格，曲線能補平", "畫曲線不需要先收集任何資料"], a: 2,
+    why: "直方圖只反映手上這批資料，沒抽到的範圍就變成 0。曲線把形狀補平，沒資料的範圍也算得出機率。前提是曲線形狀要選對，選錯一樣不準。" },
+  { type: "mc", q: "身高是連續的。「剛好 170.000… 公分、一點都不差」的機率是多少？",
+    opts: ["0，一個點底下沒有面積", "曲線在 170 那一點的高度", "大約 1%，因為 170 很常見", "50%，因為 170 剛好是平均"], a: 0,
+    why: "連續型只能問「落在某個範圍」的機率。一個點沒有寬度，面積是 0。所以實務上會問「169.5 到 170.5 公分」，而不是「剛好 170」。" },
+  { type: "mc", q: "「一次評測 10 題，答對幾題」適合用哪一種分布描述？",
+    opts: ["連續型，因為答對率是小數", "離散型，因為題數只能是整數", "不能用分布，每次結果都不同", "一定是鐘形的常態分布"], a: 1,
+    why: "答對題數只能是整數，所以是離散型，每個題數有自己的機率（第二個互動圖）。每次結果不同，正是分布要描述的事。" },
+  { type: "num", q: "曲線底下 162 到 170 公分的面積是 0.34，170 到 178 公分的面積也是 0.34。身高落在 162 到 178 公分的機率是多少？（填百分比）",
+    a: 68, tol: 0.5, unit: "%",
+    why: "不重疊的範圍，面積可以直接相加：0.34 + 0.34 = 0.68，也就是 68%。" },
+];
+const OWN = {
+  q: "用你自己的話解釋：機率分布是什麼？為什麼不直接用直方圖就好？",
+  ref: "機率分布告訴你每個值或每個範圍出現的機率。可以想成把直方圖畫成一條平滑的曲線：連續的東西（身高、秒數）看曲線底下的面積，離散的東西（答對幾題）看每根長條，全部加起來是 100%。比起直方圖，曲線不會因為資料少就坑坑洞洞，沒抽到的範圍也算得出機率；前提是曲線的形狀要選對。",
+  checks: ["有講到「每個值或範圍出現的機率」", "有講到「面積或長條全部加起來是 100%」", "有講到曲線比直方圖好在哪（資料少也平滑、沒資料的範圍也能算）"],
+};
+
+const answers = new Array(QUESTIONS.length).fill(null);
+const LETTERS = ["A", "B", "C", "D"];
+const quizEl = document.getElementById("quiz");
+
+// 把焦點移到回饋上，螢幕閱讀器才會念出對錯
+function focusFb(box) {
+  const fb = box.querySelector(".fb");
+  if (!fb) return;
+  fb.tabIndex = -1;
+  fb.focus({ preventScroll: true });
+}
+
+function feedback(ok, why) {
+  return '<div class="fb ' + (ok ? "right" : "wrong") + '"><b>' + (ok ? "答對了" : "不對") + "</b><span>" + why + "</span></div>";
+}
+
+QUESTIONS.forEach((q, qi) => {
+  const box = document.createElement("div");
+  box.className = "q";
+  let inner = '<div class="q-head"><span class="q-no">Q' + (qi + 1) + '</span><span class="q-text">' + q.q + "</span></div>";
+  if (q.type === "mc") {
+    inner += '<div class="opts">' + q.opts.map((o, oi) =>
+      '<button type="button" class="opt" id="q' + qi + "o" + oi + '" data-q="' + qi + '" data-o="' + oi + '"><span class="letter">' + LETTERS[oi] + "</span><span>" + o + "</span></button>"
+    ).join("") + "</div>";
+  } else {
+    inner += '<div class="calc"><input type="text" inputmode="decimal" id="q' + qi + 'in" aria-label="你的答案（百分比）" placeholder="例如 12"><span>' + q.unit + '</span><button type="button" class="btn" id="q' + qi + 'go" data-q="' + qi + '">對答案</button></div>';
+  }
+  inner += '<div class="fbslot"></div>';
+  box.innerHTML = inner;
+  quizEl.appendChild(box);
+});
+
+const own = document.createElement("div");
+own.className = "q";
+own.innerHTML =
+  '<div class="q-head"><span class="q-no">Q7</span><span class="q-text">' + OWN.q + "</span></div>" +
+  '<textarea id="own" aria-label="用自己的話解釋" placeholder="想到什麼寫什麼，寫完再看參考答案"></textarea>' +
+  '<div class="row"><button type="button" class="btn" id="own-go">看參考答案</button></div>' +
+  '<div class="ref" id="own-ref" hidden><div><b>參考答案</b></div><p>' + OWN.ref + "</p><div><b>對照一下，你有沒有講到：</b></div><ul>" +
+  OWN.checks.map((c, i) => '<li><label><input type="checkbox" id="own-c' + i + '"> ' + c + "</label></li>").join("") + "</ul></div>";
+quizEl.appendChild(own);
+document.getElementById("own-go").addEventListener("click", () => { document.getElementById("own-ref").hidden = false; });
+
+quizEl.addEventListener("click", e => {
+  const opt = e.target.closest(".opt");
+  if (opt) {
+    const qi = Number(opt.dataset.q), oi = Number(opt.dataset.o), q = QUESTIONS[qi];
+    if (answers[qi] !== null) return;
+    const ok = oi === q.a;
+    answers[qi] = ok;
+    const box = opt.closest(".q");
+    box.querySelectorAll(".opt").forEach((b, bi) => {
+      b.disabled = true;
+      if (bi === q.a) { b.classList.add("right"); b.insertAdjacentHTML("beforeend", '<span class="mark">（正確答案）</span>'); }
+      else if (bi === oi) { b.classList.add("wrong"); b.insertAdjacentHTML("beforeend", '<span class="mark">（你的選擇）</span>'); }
+    });
+    box.querySelector(".fbslot").innerHTML = feedback(ok, q.why);
+    focusFb(box);
+    maybeFinish();
+    return;
+  }
+  const go = e.target.closest("[id$='go'][data-q]");
+  if (go) checkNum(Number(go.dataset.q));
+});
+quizEl.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.matches(".calc input")) checkNum(Number(e.target.id.slice(1, -2)));
+});
+
+function checkNum(qi) {
+  const q = QUESTIONS[qi];
+  if (answers[qi] !== null) return;
+  const input = document.getElementById("q" + qi + "in");
+  const box = input.closest(".q");
+  // 全形數字轉半形；沒帶 % 的 0.68 當成比例，帶 % 的 0.68% 就是 0.68%
+  const s = input.value.trim().replace(/[０-９．]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+  const m = s.match(/^(\d+(?:\.\d+)?|\.\d+)\s*([%％]?)$/);
+  if (!m) { box.querySelector(".fbslot").innerHTML = '<div class="fb"><span>請填一個數字，例如 25 或 25%。</span></div>'; input.focus(); return; }
+  let v = Number(m[1]);
+  if (!m[2] && v > 0 && v <= 1) v = v * 100;
+  const ok = Math.abs(v - q.a) <= q.tol;
+  answers[qi] = ok;
+  input.disabled = true;
+  document.getElementById("q" + qi + "go").disabled = true;
+  box.querySelector(".fbslot").innerHTML = feedback(ok, (ok ? "" : "答案是 " + q.a + q.unit + "。") + q.why);
+  focusFb(box);
+  maybeFinish();
+}
+
+function maybeFinish() {
+  if (answers.some(a => a === null)) return;
+  const right = answers.filter(Boolean).length, total = answers.length;
+  let saved = true;
+  try {
+    localStorage.setItem("statquest:" + LESSON, JSON.stringify({ score: [right, total], at: new Date().toISOString().slice(0, 10) }));
+    const w = new Set(JSON.parse(localStorage.getItem("statquest:watched") || "[]"));
+    w.add(Number(LESSON));
+    localStorage.setItem("statquest:watched", JSON.stringify([...w]));
+  } catch (e) { saved = false; }
+  const el = document.getElementById("score");
+  const msg = right === total ? "全對，這支可以放心往下了。" : right >= total - 1 ? "差一點，回頭看一下答錯那題的解釋。" : "建議再看一次影片，或回到上面的互動圖玩一下。";
+  el.innerHTML = '<div class="big">答對 <span>' + right + "</span> / " + total + "</div><p>" + msg + (saved ? "分數已記在這個瀏覽器，目錄頁會顯示。" : "這個瀏覽器不允許儲存，分數沒有記下來。") + "</p>" +
+    '<div class="row"><button type="button" class="btn" id="retry">再做一次</button><a class="btn primary" href="./">回目錄</a></div>';
+  el.hidden = false;
+  el.tabIndex = -1;
+  el.focus({ preventScroll: true });
+  document.getElementById("retry").addEventListener("click", () => location.reload());
+}
+</script>
+</body>
+</html>

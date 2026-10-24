@@ -414,6 +414,8 @@ function render() {
 
   document.getElementById("bw-out").textContent = w + " " + d.unit + "，共 " + nb + " 格";
   document.getElementById("nn-out").textContent = n + " 筆";
+  document.getElementById("bw").setAttribute("aria-valuetext", w + " " + d.unit + "，共 " + nb + " 格");
+  document.getElementById("nn").setAttribute("aria-valuetext", n + " 筆");
 
   // layout：viewBox 跟著實際寬度，手機上的字才不會被縮小
   const svg = document.getElementById("chart");
@@ -494,6 +496,9 @@ window.addEventListener("resize", () => {
   const cw = document.getElementById("chart").getBoundingClientRect().width;
   if (Math.abs(cw - lastW) > 1) { lastW = cw; render(); }
 });
+// 重新整理後，有些瀏覽器會保留滑桿位置，先從滑桿讀回狀態
+state.bw = Number(document.getElementById("bw").value);
+state.nn = Number(document.getElementById("nn").value);
 regen();
 render();
 
