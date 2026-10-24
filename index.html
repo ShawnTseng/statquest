@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StatQuest 學習筆記</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one narrow column on faint graph paper; weeks are sections, lessons are rows with status on the right */
+:root {
+  --bg: #f3f6fa;
+  --paper: #ffffff;
+  --ink: #17202c;
+  --muted: #5d6a7b;
+  --line: #d9e1ea;
+  --grid: rgba(47, 91, 211, 0.06);
+  --accent: #2f5bd3;
+  --accent-soft: rgba(47, 91, 211, 0.10);
+  --done: #1d8456;
+  --done-soft: rgba(29, 132, 86, 0.12);
+  --font-display: "Avenir Next", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131a; --paper: #151c26; --ink: #e5ebf2; --muted: #96a3b4; --line: #283241;
+    --grid: rgba(126, 162, 255, 0.05); --accent: #7ea2ff; --accent-soft: rgba(126, 162, 255, 0.14);
+    --done: #4cc38a; --done-soft: rgba(76, 195, 138, 0.14);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131a; --paper: #151c26; --ink: #e5ebf2; --muted: #96a3b4; --line: #283241;
+  --grid: rgba(126, 162, 255, 0.05); --accent: #7ea2ff; --accent-soft: rgba(126, 162, 255, 0.14);
+  --done: #4cc38a; --done-soft: rgba(76, 195, 138, 0.14);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font: 15px/1.6 var(--font-body);
+}
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding-block: 32px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 28px;
+}
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+header { display: grid; gap: 10px; }
+.eyebrow { font: 600 12px/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font: 700 28px/1.2 var(--font-display); text-wrap: balance; }
+.why { margin: 0; color: var(--muted); max-width: 60ch; }
+
+.summary {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+.summary-top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+.count { font: 700 26px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.count small { font-size: 14px; color: var(--muted); font-weight: 500; }
+.next { font-size: 14px; color: var(--muted); }
+.next b { color: var(--ink); font-weight: 600; }
+/* 16 cells, one per lesson, grouped by week */
+.strip { display: flex; flex-wrap: wrap; gap: 10px; }
+.strip-week { display: flex; gap: 3px; }
+.cell { width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); display: grid; place-items: center; font: 600 10px/1 var(--font-mono); color: var(--muted); }
+.cell.is-done { background: var(--done); border-color: var(--done); color: var(--paper); }
+.cell.is-next { border-color: var(--accent); color: var(--accent); }
+
+section { display: grid; gap: 8px; }
+h2 { margin: 0; font: 600 13px/1.3 var(--font-mono); letter-spacing: 0.06em; color: var(--muted); display: flex; gap: 8px; align-items: baseline; }
+h2 span { font-family: var(--font-body); letter-spacing: 0; font-weight: 400; }
+ol { list-style: none; margin: 0; padding: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; }
+li { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; padding: 12px 14px; }
+li + li { border-top: 1px solid var(--line); }
+.num { font: 600 13px/1.6 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.title { min-width: 0; display: grid; gap: 2px; }
+.en { font-weight: 600; }
+.zh { font-size: 13px; color: var(--muted); }
+.hook { font-size: 13px; color: var(--muted); }
+.hook::before { content: "跟你有關："; color: var(--ink); }
+.links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; margin-top: 2px; }
+.links .off { color: var(--muted); }
+.status { display: grid; justify-items: end; gap: 4px; text-align: right; }
+.chip { font: 600 12px/1 var(--font-body); padding: 5px 8px; border-radius: 999px; white-space: nowrap; background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.chip.done { background: var(--done-soft); color: var(--done); border-color: transparent; }
+.chip.next { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.score { font: 600 13px/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); }
+.score .src { font: 400 11px/1 var(--font-body); color: var(--muted); }
+
+.howto { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 4px; }
+.howto p { margin: 0; }
+code { font-family: var(--font-mono); font-size: 0.92em; background: var(--accent-soft); color: var(--ink); padding: 1px 5px; border-radius: 4px; }
+
+@media (max-width: 480px) {
+  h1 { font-size: 24px; }
+  li { grid-template-columns: 30px minmax(0, 1fr); }
+  .status { grid-column: 2; justify-items: start; text-align: left; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">StatQuest · 每週 3 到 4 支</div>
+    <h1>StatQuest 學習筆記</h1>
+    <p class="why">目標：看到評測或 A/B 測試的數字時，判斷得出差異是真的，還是運氣。每看完一支，做一頁白話解釋、互動圖和測驗。</p>
+  </header>
+
+  <div class="summary" aria-label="進度">
+    <div class="summary-top">
+      <div class="count" id="count">0 <small>/ 16 支完成</small></div>
+      <div class="next" id="next"></div>
+    </div>
+    <div class="strip" id="strip"></div>
+  </div>
+
+  <main id="weeks" style="display:grid;gap:24px"></main>
+
+  <div class="howto">
+    <p>看完一支，跟 Claude 說「看完 #N」。它會先問你記得什麼，再做那一頁，並更新這裡。</p>
+    <p>「找影片」會開 YouTube 搜尋 StatQuest 加關鍵字。分數標「本機」的是這台裝置的瀏覽器記下的，還沒寫進網站。</p>
+  </div>
+</div>
+
+<script>
+// 進度的真相來源：done、score 由 Claude 在你做完一支時寫進這裡，推上 GitHub 後網站就更新。
+// score: [答對, 題數]；page: 那一支的頁面檔名，做好才填。
+const WEEKS = [
+  { label: "第 1 週", lessons: [
+    { n: 1, en: "Histograms", zh: "直方圖", q: "Histograms", hook: "看 AI 費用、回覆時間這類數字的分布長怎樣" },
+    { n: 2, en: "Probability Distributions Main Ideas", zh: "機率分布：主要概念", q: "Probability Distributions Main Ideas", hook: "直方圖和機率分布的關係" },
+    { n: 3, en: "Normal Distribution", zh: "常態分布", q: "Normal Distribution", hook: "平均和標準差怎麼描述一堆數字" },
+    { n: 4, en: "Population and Estimated Parameters", zh: "母體與估計參數", q: "Population and Estimated Parameters", hook: "105 題評測只是所有可能客人問題的一小部分" },
+  ]},
+  { label: "第 2 週", lessons: [
+    { n: 5, en: "Standard Deviation vs Standard Error", zh: "標準差與標準誤", q: "Standard Deviation vs Standard Error", hook: "準確率 99% 本身有多少誤差" },
+    { n: 6, en: "Central Limit Theorem", zh: "中央極限定理", q: "Central Limit Theorem", hook: "為什麼很多檢定都能用常態分布來算" },
+    { n: 7, en: "Confidence Intervals", zh: "信賴區間", q: "Confidence Intervals", hook: "104/105 的準確率，真實值大概落在哪個範圍" },
+    { n: 8, en: "Binomial Distribution", zh: "二項分布", q: "Binomial Distribution", hook: "每題只有對或錯，答對題數的分布" },
+  ]},
+  { label: "第 3 週", lessons: [
+    { n: 9, en: "Hypothesis Testing and the Null Hypothesis", zh: "假設檢定與虛無假設", q: "Hypothesis Testing Null Hypothesis", hook: "改字前後準確率不同，先假設「其實沒差」" },
+    { n: 10, en: "p-values: What they are", zh: "p 值是什麼", q: "p-values What they are", hook: "「沒差的話，看到這麼大差異的機率」" },
+    { n: 11, en: "How to calculate p-values", zh: "怎麼算 p 值", q: "How to calculate p-values", hook: "自己算一次改字前後的 p 值" },
+    { n: 12, en: "p-hacking", zh: "p-hacking：一直試到顯著", q: "p-hacking", hook: "一直重跑評測直到變綠，為什麼不算數" },
+    { n: 13, en: "Power Analysis", zh: "檢定力分析", q: "Power Analysis", hook: "要多少題才分得出 98% 和 99%；Klaviyo 對照組要多大" },
+  ]},
+  { label: "第 4 週", lessons: [
+    { n: 14, en: "Confusion Matrix", zh: "混淆矩陣", q: "Confusion Matrix", hook: "AI 該轉真人卻沒轉、不該轉卻轉了" },
+    { n: 15, en: "Sensitivity and Specificity", zh: "敏感度與特異度", q: "Sensitivity and Specificity", hook: "轉真人的判斷，漏掉和誤報各有多少" },
+    { n: 16, en: "Bayes' Theorem", zh: "貝氏定理", q: "Bayes Theorem", hook: "看到警示時，真的出事的機率" },
+  ]},
+  { label: "之後", extra: true, lessons: [
+    { n: 17, en: "Cosine Similarity", zh: "餘弦相似度", q: "Cosine Similarity", hook: "圖片搜尋和 FAQ 比對用的相似度" },
+    { n: 18, en: "Word Embedding", zh: "詞嵌入", q: "Word Embedding", hook: "文字怎麼變成向量" },
+  ]},
+];
+
+// 每一支的完成紀錄，Claude 更新這裡。例：7: { done: "2026-11-05", score: [6, 8], page: "07-confidence-intervals.html" }
+const PROGRESS = {
+};
+
+const CORE_TOTAL = 16;
+const pad = n => String(n).padStart(2, "0");
+
+function localScore(n) {
+  try {
+    const raw = localStorage.getItem("statquest:" + pad(n));
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    return Array.isArray(v.score) ? v.score : null;
+  } catch (e) { return null; }
+}
+
+function render() {
+  const all = WEEKS.flatMap(w => w.lessons.map(l => ({ ...l, extra: !!w.extra })));
+  const core = all.filter(l => !l.extra);
+  const isDone = l => !!(PROGRESS[l.n] && PROGRESS[l.n].done);
+  const doneCount = core.filter(isDone).length;
+  const next = all.find(l => !isDone(l));
+
+  document.getElementById("count").innerHTML = doneCount + " <small>/ " + CORE_TOTAL + " 支完成</small>";
+  document.getElementById("next").innerHTML = next
+    ? "下一支：<b>#" + pad(next.n) + " " + next.en + "</b>"
+    : "<b>全部完成</b>";
+
+  const strip = document.getElementById("strip");
+  strip.innerHTML = WEEKS.filter(w => !w.extra).map(w =>
+    '<div class="strip-week" title="' + w.label + '">' + w.lessons.map(l => {
+      const cls = isDone(l) ? "is-done" : (next && next.n === l.n ? "is-next" : "");
+      return '<div class="cell ' + cls + '" aria-label="#' + l.n + (isDone(l) ? " 完成" : "") + '">' + l.n + "</div>";
+    }).join("") + "</div>"
+  ).join("");
+
+  document.getElementById("weeks").innerHTML = WEEKS.map(w => {
+    const rows = w.lessons.map(l => {
+      const p = PROGRESS[l.n] || {};
+      const done = isDone(l);
+      const isNext = next && next.n === l.n;
+      const chip = done
+        ? '<span class="chip done">完成 ' + p.done.slice(5).replace("-", "/") + "</span>"
+        : isNext ? '<span class="chip next">下一支</span>' : '<span class="chip">未開始</span>';
+      let score = "";
+      if (p.score) score = '<span class="score">' + p.score[0] + "/" + p.score[1] + "</span>";
+      else {
+        const ls = localScore(l.n);
+        if (ls) score = '<span class="score">' + ls[0] + "/" + ls[1] + ' <span class="src">本機</span></span>';
+      }
+      const yt = "https://www.youtube.com/results?search_query=" + encodeURIComponent("StatQuest " + l.q);
+      const page = p.page
+        ? '<a href="' + p.page + '">筆記頁</a>'
+        : '<span class="off">筆記頁（看完才做）</span>';
+      return '<li id="l' + pad(l.n) + '">' +
+        '<div class="num">#' + pad(l.n) + "</div>" +
+        '<div class="title"><div class="en">' + l.en + '</div><div class="zh">' + l.zh + "</div>" +
+        '<div class="hook">' + l.hook + "</div>" +
+        '<div class="links">' + page + '<a href="' + yt + '" target="_blank" rel="noopener">找影片 ↗</a></div></div>' +
+        '<div class="status">' + chip + score + "</div>" +
+        "</li>";
+    }).join("");
+    return '<section><h2>' + w.label + (w.extra ? " <span>16 支之後再看</span>" : "") + "</h2><ol>" + rows + "</ol></section>";
+  }).join("");
+}
+render();
+</script>
+</body>
+</html>
